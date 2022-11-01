@@ -1,0 +1,30 @@
+// DM Environment file for Chaos-Station.dme.
+// All manual changes should be made outside the BEGIN_ and END_ blocks.
+// New source code should be placed in .dm files: choose File/New --> Code File.
+
+// BEGIN_INTERNALS
+// END_INTERNALS
+
+// BEGIN_FILE_DIR
+#define FILE_DIR .
+#define FILE_DIR "icons"
+#define FILE_DIR "icons/mobs"
+#define FILE_DIR "icons/obj"
+#define FILE_DIR "icons/obj/items"
+#define FILE_DIR "icons/turf"
+// END_FILE_DIR
+
+// BEGIN_PREFERENCES
+#define DEBUG
+// END_PREFERENCES
+
+// BEGIN_INCLUDE
+#include "code\__DEFINES\helpers.dm"
+#include "code\__DEFINES\is_types.dm"
+#include "code\_HELPERS\ref.dm"
+#include "code\modules\item.dm"
+#include "code\modules\world.dm"
+#include "code\modules\mob\human.dm"
+#include "skin\interface.dmf"
+// END_INCLUDE
+

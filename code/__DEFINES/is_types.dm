@@ -1,0 +1,1 @@
+#define IsDatum(type)	istype(type, /datum)
