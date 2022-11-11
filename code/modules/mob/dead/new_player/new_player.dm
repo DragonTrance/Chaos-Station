@@ -38,83 +38,6 @@
 /mob/dead/new_player/prepare_huds()
 	return
 
-/* SKYRAT EDIT REMOVAL - MOVED TO MODULAR
-/mob/dead/new_player/Topic(href, href_list[])
-	if(src != usr)
-		return
-
-	if(!client)
-		return
-
-	if(client.interviewee)
-		return FALSE
-
-	if(href_list["late_join"]) //This still exists for queue messages in chat
-		if(!SSticker?.IsRoundInProgress())
-			to_chat(usr, span_boldwarning("The round is either not ready, or has already finished..."))
-			return
-		LateChoices()
-		return
-
-	if(href_list["cancrand"])
-		src << browse(null, "window=randjob") //closes the random job window
-		LateChoices()
-		return
-
-	if(href_list["SelectedJob"])
-		if(href_list["SelectedJob"] == "Random")
-			var/list/dept_data = list()
-			for(var/datum/job_department/department as anything in SSjob.joinable_departments)
-				for(var/datum/job/job_datum as anything in department.department_jobs)
-					if(IsJobUnavailable(job_datum.title, TRUE) != JOB_AVAILABLE)
-						continue
-					dept_data += job_datum.title
-			if(dept_data.len <= 0) //Congratufuckinglations
-				tgui_alert(src, "There are literally no random jobs available for you on this server, ahelp for assistance.")
-				return
-			var/random = pick(dept_data)
-			var/randomjob = "<p><center><a href='byond://?src=[REF(src)];SelectedJob=[random]'>[random]</a></center><center><a href='byond://?src=[REF(src)];SelectedJob=Random'>Reroll</a></center><center><a href='byond://?src=[REF(src)];cancrand=[1]'>Cancel</a></center></p>"
-			var/datum/browser/popup = new(src, "randjob", "<div align='center'>Random Job</div>", 200, 150)
-			popup.set_window_options("can_close=0")
-			popup.set_content(randomjob)
-			popup.open(FALSE)
-			return
-		if(!SSticker?.IsRoundInProgress())
-			to_chat(usr, span_danger("The round is either not ready, or has already finished..."))
-			return
-
-		if(SSlag_switch.measures[DISABLE_NON_OBSJOBS])
-			to_chat(usr, span_notice("There is an administrative lock on entering the game!"))
-			return
-
-		//Determines Relevent Population Cap
-		var/relevant_cap
-		var/hpc = CONFIG_GET(number/hard_popcap)
-		var/epc = CONFIG_GET(number/extreme_popcap)
-		if(hpc && epc)
-			relevant_cap = min(hpc, epc)
-		else
-			relevant_cap = max(hpc, epc)
-
-
-
-		if(SSticker.queued_players.len && !(ckey(key) in GLOB.admin_datums))
-			if((living_player_count() >= relevant_cap) || (src != SSticker.queued_players[1]))
-				to_chat(usr, span_warning("Server is full."))
-				return
-
-		AttemptLateSpawn(href_list["SelectedJob"])
-		return
-
-	if(href_list["viewpoll"])
-		var/datum/poll_question/poll = locate(href_list["viewpoll"]) in GLOB.polls
-		poll_player(poll)
-
-	if(href_list["votepollref"])
-		var/datum/poll_question/poll = locate(href_list["votepollref"]) in GLOB.polls
-		vote_on_poll_handler(poll, href_list)
-*/
-
 //When you cop out of the round (NB: this HAS A SLEEP FOR PLAYER INPUT IN IT)
 /mob/dead/new_player/proc/make_me_an_observer()
 	if(QDELETED(src) || !src.client)
@@ -125,10 +48,10 @@
 	if(SSlag_switch.measures[DISABLE_DEAD_KEYLOOP])
 		less_input_message = " - Notice: Observer freelook is currently disabled."
 	// Don't convert this to tgui please, it's way too important
-	var/this_is_like_playing_right = alert(usr, "Are you sure you wish to observe?[less_input_message]", "Observe", "Yes", "No") //SKYRAT EDIT CHANGE
+	var/this_is_like_playing_right = alert(usr, "Are you sure you wish to observe?[less_input_message]", "Observe", "Yes", "No")
 	if(QDELETED(src) || !src.client || this_is_like_playing_right != "Yes")
 		ready = PLAYER_NOT_READY
-		show_title_screen() // SKYRAT EDIT ADDITION
+		show_title_screen()
 		return FALSE
 
 	var/mob/dead/observer/observer = new()
@@ -165,24 +88,6 @@
 			return "[jobtitle] is unavailable."
 		if(JOB_UNAVAILABLE_BANNED)
 			return "You are currently banned from [jobtitle]."
-		if(JOB_UNAVAILABLE_PLAYTIME)
-			return "You do not have enough relevant playtime for [jobtitle]."
-		if(JOB_UNAVAILABLE_ACCOUNTAGE)
-			return "Your account is not old enough for [jobtitle]."
-		if(JOB_UNAVAILABLE_SLOTFULL)
-			return "[jobtitle] is already filled to capacity."
-		//SKYRAT EDIT ADDITION
-		if(JOB_NOT_VETERAN)
-			return "You need to be veteran to join as [jobtitle]."
-		if(JOB_UNAVAILABLE_QUIRK)
-			return "[jobtitle] is restricted from your quirks."
-		if(JOB_UNAVAILABLE_LANGUAGE)
-			return "[jobtitle] is restricted from your languages."
-		if(JOB_UNAVAILABLE_SPECIES)
-			return "[jobtitle] is restricted from your species."
-		if(JOB_UNAVAILABLE_FLAVOUR)
-			return "[jobtitle] requires you to have flavour text for your character."
-		//SKYRAT EDIT END
 		if(JOB_UNAVAILABLE_ANTAG_INCOMPAT)
 			return "[jobtitle] is not compatible with some antagonist role assigned to you."
 	return "Error: Unknown job availability."
@@ -207,16 +112,8 @@
 
 	if(latejoin && !job.special_check_latejoin(client))
 		return JOB_UNAVAILABLE_GENERIC
-	//SKYRAT EDIT ADDITION
-	if(!job.has_required_languages(client.prefs))
-		return JOB_UNAVAILABLE_LANGUAGE
-	if(job.has_banned_quirk(client.prefs))
-		return JOB_UNAVAILABLE_QUIRK
 	if(job.veteran_only && !is_veteran_player(client))
 		return JOB_NOT_VETERAN
-	if(job.has_banned_species(client.prefs))
-		return JOB_UNAVAILABLE_SPECIES
-	//SKYRAT EDIT END
 	return JOB_AVAILABLE
 
 

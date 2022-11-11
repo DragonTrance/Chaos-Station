@@ -10,11 +10,6 @@
 	spawn_positions = 1
 	supervisors = SUPERVISOR_CAPTAIN
 	selection_color = "#ffddf0"
-	req_admin_notify = 1
-	minimal_player_age = 7
-	exp_requirements = 180
-	exp_required_type = EXP_TYPE_CREW
-	exp_required_type_department = EXP_TYPE_MEDICAL
 	exp_granted_type = EXP_TYPE_CREW
 	config_tag = "CHIEF_MEDICAL_OFFICER"
 

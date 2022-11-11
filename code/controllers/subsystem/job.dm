@@ -430,8 +430,6 @@ SUBSYSTEM_DEF(job)
 
 		// Loop through all unassigned players
 		for(var/mob/dead/new_player/player in unassigned)
-			if(PopcapReached())
-				RejectPlayer(player)
 
 			// Loop through all jobs
 			for(var/datum/job/job in shuffledoccupations) // SHUFFLE ME BABY
@@ -490,10 +488,6 @@ SUBSYSTEM_DEF(job)
 //We couldn't find a job from prefs for this guy.
 /datum/controller/subsystem/job/proc/HandleUnassigned(mob/dead/new_player/player)
 	var/jobless_role = player.client.prefs.read_preference(/datum/preference/choiced/jobless_role)
-
-	if(PopcapReached())
-		RejectPlayer(player)
-		return
 
 	switch (jobless_role)
 		if (BEOVERFLOW)
@@ -554,8 +548,6 @@ SUBSYSTEM_DEF(job)
 	job.radio_help_message(equipping)
 
 	if(player_client)
-		if(job.req_admin_notify)
-			to_chat(player_client, "<span class='infoplain'><b>You are playing a job that is important for Game Progression. If you have to disconnect, please notify the admins via adminhelp.</b></span>")
 		if(CONFIG_GET(number/minimal_access_threshold))
 			to_chat(player_client, span_notice("<B>As this station was initially staffed with a [CONFIG_GET(flag/jobs_have_minimal_access) ? "full crew, only your job's necessities" : "skeleton crew, additional access may"] have been added to your ID card.</B>"))
 		//SKYRAT EDIT START - ALTERNATIVE_JOB_TITLES
@@ -621,10 +613,9 @@ SUBSYSTEM_DEF(job)
 		else //We ran out of spare locker spawns!
 			break
 
+//TODO: Move to defines
 #define TOTAL_POSITIONS "Total Positions"
 #define SPAWN_POSITIONS "Spawn Positions"
-#define PLAYTIME_REQUIREMENTS "Playtime Requirements"
-#define REQUIRED_ACCOUNT_AGE "Required Account Age"
 
 /// Called in jobs subsystem initialize if LOAD_JOBS_FROM_TXT config flag is set: reads jobconfig.toml (or if in legacy mode, jobs.txt) to set all of the datum's values to what the server operator wants.
 /datum/controller/subsystem/job/proc/load_jobs_from_config()
@@ -643,17 +634,10 @@ SUBSYSTEM_DEF(job)
 			// If the value is commented out, we assume that the server operate did not want to override the codebase default values, so we skip it.
 			var/default_positions = job_config[job_key][TOTAL_POSITIONS]
 			var/starting_positions = job_config[job_key][SPAWN_POSITIONS]
-			var/playtime_requirements = job_config[job_key][PLAYTIME_REQUIREMENTS]
-			var/required_account_age = job_config[job_key][REQUIRED_ACCOUNT_AGE]
-
 			if(default_positions || default_positions == 0) // We need to account for jobs that were intentionally turned off via config too.
 				occupation.total_positions = default_positions
 			if(starting_positions || starting_positions == 0)
 				occupation.spawn_positions = starting_positions
-			if(playtime_requirements || playtime_requirements == 0)
-				occupation.exp_requirements = playtime_requirements
-			if(required_account_age || required_account_age == 0)
-				occupation.minimal_player_age = required_account_age
 
 		return
 
@@ -697,8 +681,6 @@ SUBSYSTEM_DEF(job)
 			// Playtime Requirements and Required Account Age are new and we want to see it migrated, so we will just pull codebase defaults for them.
 			// Remember, every time we write the TOML from scratch, we want to have it commented out by default to ensure that the server operator is knows that they codebase defaults when they remove the comment.
 			file_data["[job_key]"] = list(
-				"# [PLAYTIME_REQUIREMENTS]" = occupation.exp_requirements,
-				"# [REQUIRED_ACCOUNT_AGE]" = occupation.minimal_player_age,
 				"# [TOTAL_POSITIONS]" = default_positions,
 				"# [SPAWN_POSITIONS]" = starting_positions,
 			)
@@ -717,16 +699,12 @@ SUBSYSTEM_DEF(job)
 				file_data["[job_key]"] = list(
 					"# [TOTAL_POSITIONS]" = -1,
 					"# [SPAWN_POSITIONS]" = -1,
-					"# [PLAYTIME_REQUIREMENTS]" = occupation.exp_requirements,
-					"# [REQUIRED_ACCOUNT_AGE]" = occupation.minimal_player_age,
 				)
 				continue
 			// Generate new config from codebase defaults.
 			file_data["[job_key]"] = list(
 				"# [TOTAL_POSITIONS]" = occupation.total_positions,
 				"# [SPAWN_POSITIONS]" = occupation.spawn_positions,
-				"# [PLAYTIME_REQUIREMENTS]" = occupation.exp_requirements,
-				"# [REQUIRED_ACCOUNT_AGE]" = occupation.minimal_player_age,
 			)
 		if(!export_toml(user, file_data))
 			return FALSE
@@ -750,8 +728,6 @@ SUBSYSTEM_DEF(job)
 		if(job_config["[job_key]"]) // Let's see if any data for this job exists.
 			var/default_positions = job_config[job_key][TOTAL_POSITIONS]
 			var/starting_positions = job_config[job_key][SPAWN_POSITIONS]
-			var/playtime_requirements = job_config[job_key][PLAYTIME_REQUIREMENTS]
-			var/required_account_age = job_config[job_key][REQUIRED_ACCOUNT_AGE]
 
 			if(file_data["[job_key]"]) // Sanity, let's just make sure we don't overwrite anything or add any dupe keys. We also unit test for this, but eh, you never know sometimes.
 				stack_trace("We were about to over-write a job key that already exists in file_data while generating a new jobconfig.toml! This should not happen! Verify you do not have any duplicate job keys in your codebase!")
@@ -773,24 +749,6 @@ SUBSYSTEM_DEF(job)
 				file_data["[job_key]"] += list(
 					"# [SPAWN_POSITIONS]" = occupation.spawn_positions,
 				)
-
-			if(playtime_requirements) // Same pattern as above.
-				file_data["[job_key]"] += list(
-					PLAYTIME_REQUIREMENTS = playtime_requirements,
-				)
-			else
-				file_data["[job_key]"] += list(
-					"# [PLAYTIME_REQUIREMENTS]" = occupation.exp_requirements,
-				)
-
-			if(required_account_age) // Same pattern as above.
-				file_data["[job_key]"] += list(
-					REQUIRED_ACCOUNT_AGE = required_account_age,
-				)
-			else
-				file_data["[job_key]"] += list(
-					"# [REQUIRED_ACCOUNT_AGE]" = occupation.minimal_player_age,
-				)
 			continue
 		else
 			to_chat(user, span_notice("New job [job_name] (using key [job_key]) detected! Adding to jobconfig.toml using default codebase values..."))
@@ -798,8 +756,6 @@ SUBSYSTEM_DEF(job)
 			file_data["[job_key]"] = list(
 				"# [TOTAL_POSITIONS]" = occupation.total_positions,
 				"# [SPAWN_POSITIONS]" = occupation.spawn_positions,
-				"# [PLAYTIME_REQUIREMENTS]" = occupation.exp_requirements,
-				"# [REQUIRED_ACCOUNT_AGE]" = occupation.minimal_player_age,
 			)
 
 	if(!export_toml(user, file_data))
@@ -816,8 +772,6 @@ SUBSYSTEM_DEF(job)
 
 #undef TOTAL_POSITIONS
 #undef SPAWN_POSITIONS
-#undef PLAYTIME_REQUIREMENTS
-#undef REQUIRED_ACCOUNT_AGE
 
 /datum/controller/subsystem/job/proc/HandleFeedbackGathering()
 	for(var/datum/job/job as anything in joinable_occupations)
@@ -833,12 +787,6 @@ SUBSYSTEM_DEF(job)
 				continue //This player is not ready
 			if(is_banned_from(player.ckey, job.title) || QDELETED(player))
 				banned++
-				continue
-			if(!job.player_old_enough(player.client))
-				young++
-				continue
-			if(job.required_playtime_remaining(player.client))
-				young++
 				continue
 			switch(player.client.prefs.job_preferences[job.title])
 				if(JP_HIGH)
@@ -856,20 +804,9 @@ SUBSYSTEM_DEF(job)
 		SSblackbox.record_feedback("nested tally", "job_preferences", banned, list("[job.title]", "banned"))
 		SSblackbox.record_feedback("nested tally", "job_preferences", young, list("[job.title]", "young"))
 
-/datum/controller/subsystem/job/proc/PopcapReached()
-	var/hpc = CONFIG_GET(number/hard_popcap)
-	var/epc = CONFIG_GET(number/extreme_popcap)
-	if(hpc || epc)
-		var/relevent_cap = max(hpc, epc)
-		if((initial_players_to_assign - unassigned.len) >= relevent_cap)
-			return 1
-	return 0
-
 /datum/controller/subsystem/job/proc/RejectPlayer(mob/dead/new_player/player)
 	if(player.mind && player.mind.special_role)
 		return
-	if(PopcapReached())
-		JobDebug("Popcap overflow Check observer located, Player: [player]")
 	JobDebug("Player rejected :[player]")
 	to_chat(player, "<span class='infoplain'><b>You have failed to qualify for any job you desired.</b></span>")
 	unassigned -= player
@@ -1094,36 +1031,10 @@ SUBSYSTEM_DEF(job)
 		JobDebug("[debug_prefix] Error: [get_job_unavailable_error_message(JOB_UNAVAILABLE_ANTAG_INCOMPAT, possible_job.title)], Player: [player][add_job_to_log ? ", Job: [possible_job]" : ""]")
 		return JOB_UNAVAILABLE_ANTAG_INCOMPAT
 
-	if(!possible_job.player_old_enough(player.client))
-		JobDebug("[debug_prefix] Error: [get_job_unavailable_error_message(JOB_UNAVAILABLE_ACCOUNTAGE, possible_job.title)], Player: [player][add_job_to_log ? ", Job: [possible_job]" : ""]")
-		return JOB_UNAVAILABLE_ACCOUNTAGE
-
-	var/required_playtime_remaining = possible_job.required_playtime_remaining(player.client)
-	if(required_playtime_remaining)
-		JobDebug("[debug_prefix] Error: [get_job_unavailable_error_message(JOB_UNAVAILABLE_PLAYTIME, possible_job.title)], Player: [player], MissingTime: [required_playtime_remaining][add_job_to_log ? ", Job: [possible_job]" : ""]")
-		return JOB_UNAVAILABLE_PLAYTIME
-
 	// Run the banned check last since it should be the rarest check to fail and can access the database.
 	if(is_banned_from(player.ckey, possible_job.title))
 		JobDebug("[debug_prefix] Error: [get_job_unavailable_error_message(JOB_UNAVAILABLE_BANNED, possible_job.title)], Player: [player][add_job_to_log ? ", Job: [possible_job]" : ""]")
 		return JOB_UNAVAILABLE_BANNED
-
-	//SKYRAT EDIT ADDITION BEGIN - CUSTOMIZATION
-	if(possible_job.veteran_only && !is_veteran_player(player.client))
-		JobDebug("[debug_prefix] Error: [get_job_unavailable_error_message(JOB_NOT_VETERAN)], Player: [player][add_job_to_log ? ", Job: [possible_job]" : ""]")
-		return JOB_NOT_VETERAN
-
-	if(possible_job.has_banned_quirk(player.client.prefs))
-		JobDebug("[debug_prefix] Error: [get_job_unavailable_error_message(JOB_UNAVAILABLE_QUIRK)], Player: [player][add_job_to_log ? ", Job: [possible_job]" : ""]")
-		return JOB_UNAVAILABLE_QUIRK
-
-	if(!possible_job.has_required_languages(player.client.prefs))
-		JobDebug("[debug_prefix] Error: [get_job_unavailable_error_message(JOB_UNAVAILABLE_LANGUAGE)], Player: [player][add_job_to_log ? ", Job: [possible_job]" : ""]")
-		return JOB_UNAVAILABLE_LANGUAGE
-
-	if(possible_job.has_banned_species(player.client.prefs))
-		JobDebug("[debug_prefix] Error: [get_job_unavailable_error_message(JOB_UNAVAILABLE_SPECIES)], Player: [player][add_job_to_log ? ", Job: [possible_job]" : ""]")
-		return JOB_UNAVAILABLE_SPECIES
 
 	// Run this check after is_banned_from since it can query the DB which may sleep.
 	if(QDELETED(player))

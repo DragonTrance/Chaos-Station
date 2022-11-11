@@ -8,10 +8,6 @@
 	spawn_positions = 1
 	supervisors = "Central Command and the Nanotrasen Consultant"
 	selection_color = "#c6ffe0"
-	minimal_player_age = 7
-	exp_requirements = 2400
-	exp_required_type = EXP_TYPE_CREW
-	exp_required_type_department = EXP_TYPE_COMMAND
 	exp_granted_type = EXP_TYPE_CREW
 	config_tag = "BLUESHIELD"
 

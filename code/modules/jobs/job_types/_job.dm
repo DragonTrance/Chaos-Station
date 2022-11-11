@@ -41,25 +41,10 @@
 	/// What kind of mob type joining players with this job as their assigned role are spawned as.
 	var/spawn_type = /mob/living/carbon/human
 
-	/// If this is set to 1, a text is printed to the player when jobs are assigned, telling him that he should let admins know that he has to disconnect.
-	var/req_admin_notify
-
-	/// If you have the use_age_restriction_for_jobs config option enabled and the database set up, this option will add a requirement for players to be at least minimal_player_age days old. (meaning they first signed in at least that many days before.)
-	var/minimal_player_age = 0
-
 	var/outfit = null
 
 	/// The job's outfit that will be assigned for plasmamen.
 	var/plasmaman_outfit = null
-
-	/// Minutes of experience-time required to play in this job. The type is determined by [exp_required_type] and [exp_required_type_department] depending on configs.
-	var/exp_requirements = 0
-	/// Experience required to play this job, if the config is enabled, and `exp_required_type_department` is not enabled with the proper config.
-	var/exp_required_type = ""
-	/// Department experience required to play this job, if the config is enabled.
-	var/exp_required_type_department = ""
-	/// Experience type granted by playing in this job.
-	var/exp_granted_type = ""
 
 	///How much money does this crew member make in a single paycheck? Note that passive paychecks are capped to PAYCHECK_CREW in regular gameplay after roundstart.
 	var/paycheck = PAYCHECK_CREW
@@ -71,6 +56,9 @@
 
 	///Lazylist of traits added to the liver of the mob assigned this job (used for the classic "cops heal from donuts" reaction, among others)
 	var/list/liver_traits = null
+
+	/// Experience type granted by playing in this job.
+	var/exp_granted_type = ""
 
 	var/display_order = JOB_DISPLAY_ORDER_DEFAULT
 
@@ -117,16 +105,11 @@
 	/// String. If set to a non-empty one, it will be the key for the policy text value to show this role on spawn.
 	var/policy_index = ""
 
-	//SKYRAT ADDITION START
 	/// Job title to use for spawning. Allows a job to spawn without needing map edits.
 	var/job_spawn_title
-	//SKYRAT ADDITION END
 
 	///RPG job names, for the memes
 	var/rpg_title
-
-	/// Does this job ignore human authority?
-	var/ignore_human_authority = FALSE
 
 	/// String key to track any variables we want to tie to this job in config, so we can avoid using the job title. We CAPITALIZE it in order to ensure it's unique and resistant to trivial formatting changes.
 	/// You'll probably break someone's config if you change this, so it's best to not to.
@@ -215,36 +198,6 @@
 	if(H && GLOB.announcement_systems.len)
 		//timer because these should come after the captain announcement
 		SSticker.OnRoundstart(CALLBACK(GLOBAL_PROC, .proc/_addtimer, CALLBACK(pick(GLOB.announcement_systems), /obj/machinery/announcement_system/proc/announce, "NEWHEAD", H.real_name, job_title, channels), 1)) // SKYRAT EDIT CHANGE - ALTERNATIVE_JOB_TITLES - Original: SSticker.OnRoundstart(CALLBACK(GLOBAL_PROC, .proc/_addtimer, CALLBACK(pick(GLOB.announcement_systems), /obj/machinery/announcement_system/proc/announce, "NEWHEAD", H.real_name, H.job, channels), 1))
-
-//If the configuration option is set to require players to be logged as old enough to play certain jobs, then this proc checks that they are, otherwise it just returns 1
-/datum/job/proc/player_old_enough(client/player)
-	if(!player || !available_in_days(player))
-		return TRUE //Available in 0 days = available right now = player is old enough to play.
-	return FALSE
-
-
-/datum/job/proc/available_in_days(client/player)
-	if(!player)
-		return 0
-
-	if(!CONFIG_GET(flag/use_age_restriction_for_jobs))
-		return 0
-
-	//Without a database connection we can't get a player's age so we'll assume they're old enough for all jobs
-	if(!SSdbcore.Connect())
-		return 0
-
-	// As of the time of writing this comment, verifying database connection isn't "solved". Sometimes rust-g will report a
-	// connection mid-shift despite the database dying.
-	// If the client age is -1, it means that no code path has overwritten it. Even first time connections get it set to 0,
-	// so it's a pretty good indication of a database issue. We'll again just assume they're old enough for all jobs.
-	if(player.player_age == -1)
-		return 0
-
-	if(!isnum(minimal_player_age))
-		return 0
-
-	return max(0, minimal_player_age - player.player_age)
 
 /datum/job/proc/config_check()
 	return TRUE
@@ -479,37 +432,15 @@
 	if(!player_client)
 		return // Disconnected while checking for the appearance ban.
 
-	var/require_human = CONFIG_GET(flag/enforce_human_authority) && (job.departments_bitflags & DEPARTMENT_BITFLAG_COMMAND)
-	if(require_human)
-		var/all_authority_require_human = CONFIG_GET(flag/enforce_human_authority_on_everyone)
-		if(!all_authority_require_human && job.ignore_human_authority)
-			require_human = FALSE
-
 	src.job = job.title
 
 	if(fully_randomize)
 		player_client.prefs.apply_prefs_to(src)
-
-		if(require_human)
-			randomize_human_appearance(~RANDOMIZE_SPECIES)
-		else
-			randomize_human_appearance()
-
-		if (require_human)
-			set_species(/datum/species/human)
-			dna.species.roundstart_changed = TRUE
-
 		if(GLOB.current_anonymous_theme)
 			fully_replace_character_name(null, GLOB.current_anonymous_theme.anonymous_name(src))
 	else
 		var/is_antag = (player_client.mob.mind in GLOB.pre_setup_antags)
-		if(require_human)
-			player_client.prefs.randomise["species"] = FALSE
 		player_client.prefs.safe_transfer_prefs_to(src, TRUE, is_antag)
-		if(require_human && !ishumanbasic(src))
-			set_species(/datum/species/human)
-			dna.species.roundstart_changed = TRUE
-			apply_pref_name(/datum/preference/name/backup_human, player_client)
 		if(CONFIG_GET(flag/force_random_names))
 			var/species_type = player_client.prefs.read_preference(/datum/preference/choiced/species)
 			var/datum/species/species = new species_type

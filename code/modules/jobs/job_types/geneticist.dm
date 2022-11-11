@@ -7,8 +7,6 @@
 	spawn_positions = 2
 	supervisors = SUPERVISOR_RD
 	selection_color = "#ffeeff"
-	exp_requirements = 60
-	exp_required_type = EXP_TYPE_CREW
 	exp_granted_type = EXP_TYPE_CREW
 	config_tag = "GENETICIST"
 

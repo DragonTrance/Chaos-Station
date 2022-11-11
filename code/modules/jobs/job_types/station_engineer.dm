@@ -8,8 +8,6 @@
 	spawn_positions = 5
 	supervisors = SUPERVISOR_CE
 	selection_color = "#fff5cc"
-	exp_requirements = 60
-	exp_required_type = EXP_TYPE_CREW
 	exp_granted_type = EXP_TYPE_CREW
 	config_tag = "STATION_ENGINEER"
 

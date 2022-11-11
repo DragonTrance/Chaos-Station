@@ -9,9 +9,6 @@
 	spawn_positions = 8 //Handled in /datum/controller/occupations/proc/setup_officer_positions() //SKYRAT EDIT: SEE ABOVE
 	supervisors = "the Head of Security, and the head of your assigned department (if applicable)"
 	selection_color = "#ffeeee"
-	minimal_player_age = 7
-	exp_requirements = 300
-	exp_required_type = EXP_TYPE_CREW
 	exp_granted_type = EXP_TYPE_CREW
 	config_tag = "SECURITY_OFFICER"
 
