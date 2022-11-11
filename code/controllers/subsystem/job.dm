@@ -1125,15 +1125,7 @@ SUBSYSTEM_DEF(job)
 		JobDebug("[debug_prefix] Error: [get_job_unavailable_error_message(JOB_UNAVAILABLE_SPECIES)], Player: [player][add_job_to_log ? ", Job: [possible_job]" : ""]")
 		return JOB_UNAVAILABLE_SPECIES
 
-	if(length_char(player.client.prefs.read_preference(/datum/preference/text/flavor_text)) <= FLAVOR_TEXT_CHAR_REQUIREMENT)
-		JobDebug("[debug_prefix] Error: [get_job_unavailable_error_message(JOB_UNAVAILABLE_FLAVOUR)], Player: [player][add_job_to_log ? ", Job: [possible_job]" : ""]")
-		return JOB_UNAVAILABLE_FLAVOUR
-
-
-	//SKYRAT EDIT END
-
 	// Run this check after is_banned_from since it can query the DB which may sleep.
-	// Need to recheck the player exists after is_banned_from since it can query the DB which may sleep.
 	if(QDELETED(player))
 		JobDebug("[debug_prefix] player is qdeleted, Player: [player][add_job_to_log ? ", Job: [possible_job]" : ""]")
 		return JOB_UNAVAILABLE_GENERIC

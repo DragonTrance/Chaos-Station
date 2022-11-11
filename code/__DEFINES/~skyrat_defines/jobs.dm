@@ -9,5 +9,3 @@
 #define HEAD_RESTRICTED_QUIRKS "Blind" = TRUE, "Deaf" = TRUE, "Mute" = TRUE, "Foreigner" = TRUE, "Chunky Fingers" = TRUE, "Brain Tumor" = TRUE, "Illiterate" = TRUE
 #define TECH_RESTRICTED_QUIRKS "Chunky Fingers" = TRUE
 #define GUARD_RESTRICTED_QUIRKS "Blind" = TRUE, "Deaf" = TRUE, "Foreigner" = TRUE, "Pacifist" = TRUE, "Nerve Stapled" = TRUE
-
-#define FLAVOR_TEXT_CHAR_REQUIREMENT 150
