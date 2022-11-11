@@ -1,9 +1,10 @@
-## Skyrat 13 (/tg/station Downstream)
+## Chaos Station (Downstream of a Downstream of a Downstream of...)
+**TODO:** This readme isn't finished yet! I'll finish it some time.
 
-[![CI Suite](https://github.com/Skyrat-SS13/Skyrat-tg/actions/workflows/ci_suite.yml/badge.svg)](https://github.com/Skyrat-SS13/Skyrat-tg/actions/workflows/ci_suite.yml)
-[![Percentage of issues still open](http://isitmaintained.com/badge/open/Skyrat-SS13/Skyrat-tg.svg)](https://isitmaintained.com/project/Skyrat-SS13/Skyrat-tg "Percentage of issues still open")
-[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/Skyrat-SS13/Skyrat-tg.svg)](https://isitmaintained.com/project/Skyrat-SS13/Skyrat-tg "Average time to resolve an issue")
-![Coverage](https://img.shields.io/codecov/c/github/Skyrat-SS13/Skyrat-tg)
+[![CI Suite](https://github.com/DragonTrance/Chaos-Station/actions/workflows/ci_suite.yml/badge.svg)]https://github.com/DragonTrance/Chaos-Station/actions/workflows/ci_suite.yml)
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/DragonTrance/Chaos-Station.svg)](https://isitmaintained.com/project/DragonTrance/Chaos-Station "Percentage of issues still open")
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/DragonTrance/Chaos-Station.svg)](https://isitmaintained.com/project/DragonTrance/Chaos-Station "Average time to resolve an issue")
+![Coverage](https://img.shields.io/codecov/c/github/DragonTrance/Chaos-Station)
 
 [![resentment](https://forthebadge.com/images/badges/built-with-resentment.svg)](https://www.monkeyuser.com/assets/images/2019/131-bug-free.png) [![resentment](https://forthebadge.com/images/badges/contains-technical-debt.svg)](https://user-images.githubusercontent.com/8171642/50290880-ffef5500-043a-11e9-8270-a2e5b697c86c.png) [![forinfinityandbyond](https://user-images.githubusercontent.com/5211576/29499758-4efff304-85e6-11e7-8267-62919c3688a9.gif)](https://www.reddit.com/r/SS13/comments/5oplxp/what_is_the_main_problem_with_byond_as_an_engine/dclbu1a)
 
