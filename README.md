@@ -1,7 +1,7 @@
 ## Chaos Station (Downstream of a Downstream of a Downstream of...)
 **TODO:** This readme isn't finished yet! I'll finish it some time.
 
-[![CI Suite](https://github.com/DragonTrance/Chaos-Station/actions/workflows/ci_suite.yml/badge.svg)]https://github.com/DragonTrance/Chaos-Station/actions/workflows/ci_suite.yml)
+[![CI Suite](https://github.com/DragonTrance/Chaos-Station/actions/workflows/ci_suite.yml/badge.svg)](https://github.com/DragonTrance/Chaos-Station/actions/workflows/ci_suite.yml)
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/DragonTrance/Chaos-Station.svg)](https://isitmaintained.com/project/DragonTrance/Chaos-Station "Percentage of issues still open")
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/DragonTrance/Chaos-Station.svg)](https://isitmaintained.com/project/DragonTrance/Chaos-Station "Average time to resolve an issue")
 ![Coverage](https://img.shields.io/codecov/c/github/DragonTrance/Chaos-Station)
